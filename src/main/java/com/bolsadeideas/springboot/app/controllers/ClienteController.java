@@ -1,5 +1,6 @@
 package com.bolsadeideas.springboot.app.controllers;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import org.springframework.http.HttpHeaders;
@@ -92,13 +93,24 @@ public class ClienteController {
 			return "form";
 		}
 		if(!foto.isEmpty()) {
+			
+			if (cliente.getId() != null  
+					&& cliente.getId() >0 
+					&& cliente.getFoto() != null
+					&& cliente.getFoto().length() > 0) {
+				Path rootPath = Paths.get("upload").resolve(cliente.getFoto()).toAbsolutePath();
+				
+				File archivo = rootPath.toFile();
+				
+				if(archivo.exists() && archivo.canRead()) 
+					if(archivo.delete()) 
+						log.info("Foto Eliminada con exito");
+				
+			}
 			String uniqueFileName = UUID.randomUUID().toString() + "_" + foto.getOriginalFilename();
 			Path rootPath = Paths.get("upload").resolve(uniqueFileName);
-			
 			log.info("Unique path => "+uniqueFileName);
-			
 			Path rootAbsoludPath = rootPath.toAbsolutePath();
-			
 			log.info("absolute Path"+rootAbsoludPath);
 			
 			
@@ -134,7 +146,18 @@ public class ClienteController {
 	public String eliminar(@PathVariable(value="id") Long id,Map<String,Object> model) {
 
 		if (id>0) {
+			Cliente cliente = clienteService.findOne(id);
 			clienteService.delete(id);
+			
+			Path rootPath = Paths.get("upload").resolve(cliente.getFoto()).toAbsolutePath();
+			
+			File archivo = rootPath.toFile();
+			
+			if(archivo.exists() && archivo.canRead()) 
+				if(archivo.delete()) 
+					log.info("Foto Eliminada con exito");
+				
+			
 		}
 		return "redirect:/listar";
 		

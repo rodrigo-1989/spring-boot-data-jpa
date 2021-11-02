@@ -5,10 +5,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.validation.Valid;
 
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,6 +29,8 @@ import com.bolsadeideas.springboot.app.models.service.IClienteService;
 @Controller
 @SessionAttributes("cliente")
 public class ClienteController {
+	
+	private final Logger log = LoggerFactory.getLogger(getClass());
 	
 	@Autowired
 	private IClienteService clienteService;
@@ -65,14 +69,20 @@ public class ClienteController {
 			return "form";
 		}
 		if(!foto.isEmpty()) {
-			String rootPath = "/Users/rodrigolopezmendez/Documents/upload";
+			String uniqueFileName = UUID.randomUUID().toString() + "_" + foto.getOriginalFilename();
+			Path rootPath = Paths.get("upload").resolve(uniqueFileName);
+			
+			log.info("Unique path => "+uniqueFileName);
+			
+			Path rootAbsoludPath = rootPath.toAbsolutePath();
+			
+			log.info("absolute Path"+rootAbsoludPath);
+			
 			
 			try {
-				byte[] bytes = foto.getBytes();
-				Path rutaCompleta = Paths.get(rootPath+"/"+foto.getOriginalFilename());
-				Files.write(rutaCompleta, bytes);
+				Files.copy(foto.getInputStream(),rootAbsoludPath);
 				
-				cliente.setFoto(foto.getOriginalFilename());
+				cliente.setFoto(uniqueFileName);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

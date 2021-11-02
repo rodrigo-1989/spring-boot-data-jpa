@@ -41,7 +41,7 @@ public class ClienteController {
 	@Autowired
 	private IClienteService clienteService;
 	
-	@GetMapping(value = "upload/{filename:.+}")
+	@GetMapping(value = "foto/{filename:.+}")
 	public ResponseEntity<Resource> verFoto(@PathVariable String filename){
 		Path pathFoto = Paths.get("upload").resolve(filename).toAbsolutePath();
 		log.info("PathFoto  => " + pathFoto);

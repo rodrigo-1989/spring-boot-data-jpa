@@ -11,7 +11,7 @@
 			<div class="card-body">
 
 				<img th:if="${cliente.foto != null}" class="img-thumbnail rounded float-left" style="max-width: 25%;"
-					th:src="@{'/upload/' + ${cliente.foto}}" th:alt="${cliente.foto}">
+					th:src="@{'/foto/' + ${cliente.foto}}" th:alt="${cliente.foto}">
 
 				<ul class="list-group">
 					<li class="list-group-item" th:text="${cliente.nombre}"></li>

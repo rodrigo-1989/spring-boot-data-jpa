@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://thymeleaf.org">
+
+<head th:replace="layout/layout :: head"></head>
+
+<body>
+	<header th:replace="layout/layout :: header"></header>
+	<div class="container py-4">
+		<div class="card bg-danger text-white">
+			<div class="card-header">Error acceso denegado</div>
+			<div class="card-body">
+	<h5 class="card-title"> Lo sentimos <span th:text="${#httpServletRequest.remoteUser}">Permiso denegado, a este recurso</span></h5>
+				<a th:href="@{/listar}" class="btn btn-ouline-light" role="button" >Ir al inicio</a>
+
+			</div>
+		</div>
+	</div>
+	<footer th:replace="layout/layout :: footer"></footer>
+</body>
+
+</html>

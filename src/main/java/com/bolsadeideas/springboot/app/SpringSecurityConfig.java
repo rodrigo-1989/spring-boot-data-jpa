@@ -21,13 +21,15 @@ public class SpringSecurityConfig  extends WebSecurityConfigurerAdapter{
 		.antMatchers("/ver/**").hasAnyRole("USER")
 		.antMatchers("/upload/**").hasAnyRole("USER")
 		.antMatchers("/form/**").hasAnyRole("ADMIN")
-		.antMatchers("/elimina/**").hasAnyRole("ADMIN")
+		.antMatchers("/eliminar/**").hasAnyRole("ADMIN")
 		.anyRequest().authenticated()
 		.and()
 		.formLogin().loginPage("/login")
 		.permitAll()
 		.and()
-		.logout().permitAll();
+		.logout().permitAll()
+		.and()
+		.exceptionHandling().accessDeniedPage("/error_403");
 	}
 
 	@Bean

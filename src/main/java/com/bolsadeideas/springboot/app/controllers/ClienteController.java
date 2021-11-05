@@ -11,6 +11,8 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -30,6 +32,7 @@ import com.bolsadeideas.springboot.app.models.service.IUploadFileService;
 @Controller
 @SessionAttributes("cliente")
 public class ClienteController {
+	
 	
 	@Autowired
 	private IClienteService clienteService;
@@ -64,7 +67,14 @@ public class ClienteController {
 	}
 
 	@GetMapping(value = {"/listar","/"})
-	public String listar(Model model) {
+	public String listar(Model model,Authentication authentication) {
+		if(authentication != null) {
+			System.out.println("Hola usuario ".concat(authentication.getName()));
+		}
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if(auth != null) {
+			System.out.println("Hola usuario ".concat(auth.getName())+" con auth");
+		}
 		model.addAttribute("titulo","Listado de clientes");
 		model.addAttribute("clientes",clienteService.findAll());
 		return "listar";

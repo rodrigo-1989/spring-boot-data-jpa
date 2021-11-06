@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.bolsadeideas.springboot.app.auth.handler.LoginSuccessHandler;
+import com.bolsadeideas.springboot.app.models.service.JpaUserDetailsService;
 
 @EnableGlobalMethodSecurity(securedEnabled = true,prePostEnabled = true)
 @Configuration
@@ -25,8 +26,11 @@ public class SpringSecurityConfig  extends WebSecurityConfigurerAdapter{
 	@Autowired
 	private BCryptPasswordEncoder passwordEncoder;
 	
+//	@Autowired
+//	private DataSource dataSource;
+	
 	@Autowired
-	private DataSource dataSource;
+	private JpaUserDetailsService userDetailService;
 	
 	
 	
@@ -52,12 +56,27 @@ public class SpringSecurityConfig  extends WebSecurityConfigurerAdapter{
 
 	@Autowired
 	public void configurerGlobal (AuthenticationManagerBuilder builder) throws Exception {
+//		En este metodo se implementa JPA para autenticacion de usuaios desde BD
 		
-		builder.jdbcAuthentication()
-		.dataSource(dataSource)
-		.passwordEncoder(passwordEncoder)
-		.usersByUsernameQuery("select username, password, enable from users where username=?")
-		.authoritiesByUsernameQuery("select u.username, a.role from roles a inner join users u on (a.user_id=u.id) where u.username=?");
+		builder.userDetailsService(userDetailService)
+		.passwordEncoder(passwordEncoder);
+		
+		
+		
+		
+		
+// En este caso se implementa autenticacion de usuarios con JDBC
+//		builder.jdbcAuthentication()
+//		.dataSource(dataSource)
+//		.passwordEncoder(passwordEncoder)
+//		.usersByUsernameQuery("select username, password, enable from users where username=?")
+//		.authoritiesByUsernameQuery("select u.username, a.role from roles a inner join users u on (a.user_id=u.id) where u.username=?");
+		
+		
+		
+		
+		
+//En este caso se puede ver spring security pero con usuarios en memoria
 //		PasswordEncoder encoder = passwordEncoder;
 //		UserBuilder users =  User.builder().passwordEncoder(encoder::encode);
 //		//Usuarios en memoria

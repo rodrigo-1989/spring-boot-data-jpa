@@ -2,17 +2,23 @@ package com.bolsadeideas.springboot.app.controllers;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Collection;
 import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestWrapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -67,7 +73,8 @@ public class ClienteController {
 	}
 
 	@GetMapping(value = {"/listar","/"})
-	public String listar(Model model,Authentication authentication) {
+	public String listar(Model model,Authentication authentication,HttpServletRequest request) {
+		
 		if(authentication != null) {
 			System.out.println("Hola usuario ".concat(authentication.getName()));
 		}
@@ -75,6 +82,22 @@ public class ClienteController {
 		if(auth != null) {
 			System.out.println("Hola usuario ".concat(auth.getName())+" con auth");
 		}
+		if (hasRole("ROLE_USER")) {
+			System.out.println("Hola ".concat(auth.getName()).concat(" Tienes acceso"));
+		}else {
+			System.out.println("Hola ".concat(auth.getName()).concat(" NO Tienes acceso tu role es =>").concat(auth.getAuthorities().toString()));
+		}
+		
+		SecurityContextHolderAwareRequestWrapper securityContext = new SecurityContextHolderAwareRequestWrapper(request,"ROLE_");
+		
+		if(securityContext.isUserInRole("ADMIN")) {
+			System.out.println("Hola desde SecurityContextHolderAwareRequestWrapper  ".concat(auth.getName()).concat(" Tienes acceso"));
+		}
+		
+		if(request.isUserInRole("ROLE_ADMIN")) {
+			System.out.println("Hola con request  ".concat(auth.getName()).concat(" Tienes acceso"));
+		}
+		
 		model.addAttribute("titulo","Listado de clientes");
 		model.addAttribute("clientes",clienteService.findAll());
 		return "listar";
@@ -146,6 +169,30 @@ public class ClienteController {
 		}
 		return "redirect:/listar";
 		
+	}
+	
+	private boolean hasRole(String role) {
+		SecurityContext context = SecurityContextHolder.getContext();
+		
+		if(context == null) {
+			return false;
+		}
+
+		Authentication auth = context.getAuthentication();
+		
+		if(auth == null) {
+			return false;
+		}
+		
+		Collection<? extends GrantedAuthority> authorities = auth.getAuthorities();
+		System.out.println("hasRole () => "+auth.getAuthorities());
+		return authorities.contains(new SimpleGrantedAuthority(role));
+//		for (GrantedAuthority authority:authorities) {
+//			if(role.equals(authority.getAuthority())) {
+//				return true;
+//			}
+//		}
+//		return false;
 	}
 }
 

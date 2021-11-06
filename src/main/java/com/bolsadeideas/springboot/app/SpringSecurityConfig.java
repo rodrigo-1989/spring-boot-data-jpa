@@ -1,7 +1,8 @@
 package com.bolsadeideas.springboot.app;
 
+import javax.sql.DataSource;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -20,6 +21,14 @@ public class SpringSecurityConfig  extends WebSecurityConfigurerAdapter{
 	
 	@Autowired
 	private LoginSuccessHandler successHandler;
+	
+	@Autowired
+	private BCryptPasswordEncoder passwordEncoder;
+	
+	@Autowired
+	private DataSource dataSource;
+	
+	
 	
 	//Permisos para los usuarios segun su rol
 	@Override
@@ -41,18 +50,19 @@ public class SpringSecurityConfig  extends WebSecurityConfigurerAdapter{
 		.exceptionHandling().accessDeniedPage("/error_403");
 	}
 
-	@Bean
-	public BCryptPasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
-
 	@Autowired
 	public void configurerGlobal (AuthenticationManagerBuilder builder) throws Exception {
-		PasswordEncoder encoder = passwordEncoder();
-		UserBuilder users =  User.builder().passwordEncoder(encoder::encode);
-		//Usuarios en memoria
-		builder.inMemoryAuthentication()
-		.withUser(users.username("admin").password("12345").roles("ADMIN","USER"))
-		.withUser(users.username("julio").password("12345").roles("USER"));
+		
+		builder.jdbcAuthentication()
+		.dataSource(dataSource)
+		.passwordEncoder(passwordEncoder)
+		.usersByUsernameQuery("select username, password, enable from users where username=?")
+		.authoritiesByUsernameQuery("select u.username, a.role from roles a inner join users u on (a.user_id=u.id) where u.username=?");
+//		PasswordEncoder encoder = passwordEncoder;
+//		UserBuilder users =  User.builder().passwordEncoder(encoder::encode);
+//		//Usuarios en memoria
+//		builder.inMemoryAuthentication()
+//		.withUser(users.username("admin").password("12345").roles("ADMIN","USER"))
+//		.withUser(users.username("julio").password("12345").roles("USER"));
 	}
 }

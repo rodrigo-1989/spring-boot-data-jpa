@@ -13,6 +13,8 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -46,7 +48,8 @@ public class ClienteController {
 	@Autowired
 	private IUploadFileService uploadFile;
 	
-	@GetMapping(value = "foto/{filename:.+}")
+	@Secured("ROLE_USER")
+	@GetMapping(value = "/foto/{filename:.+}")
 	public ResponseEntity<Resource> verFoto(@PathVariable String filename){
 		
 		
@@ -60,7 +63,7 @@ public class ClienteController {
 		return ResponseEntity.ok()
 				.header(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename\""+recurso.getFilename()+"\"").body(recurso);
 	}
-	
+	@PreAuthorize("hasRole('ROLE_USER')")
 	@GetMapping("/ver/{id}")
 	public String ver(@PathVariable (value="id")Long id,Map<String,Object> model) {
 		Cliente cliente =clienteService.findOne(id);
@@ -102,7 +105,7 @@ public class ClienteController {
 		model.addAttribute("clientes",clienteService.findAll());
 		return "listar";
 	}
-	
+	@Secured("ROLE_ADMIN")
 	@GetMapping(value = "/form")
 	public String crear(Map<String,Object> model) {
 		
@@ -144,7 +147,7 @@ public class ClienteController {
 		status.setComplete();
 		return "redirect:listar";
 	}
-	
+	@Secured("ROLE_ADMIN")
 	@GetMapping(value = "/form/{id}")
 	public String editar(@PathVariable(value="id") Long id,Map<String,Object> model) {
 		Cliente cliente = new Cliente();
@@ -157,7 +160,7 @@ public class ClienteController {
 		model.put("titulo","Editar cliente");
 		return "form";
 	}
-	
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@GetMapping(value = "/eliminar/{id}")
 	public String eliminar(@PathVariable(value="id") Long id,Map<String,Object> model) {
 
